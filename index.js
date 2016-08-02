@@ -32,13 +32,15 @@ server.register([{
   }
 }, {
   register: require('inert')
+}, {
+  register: require('vision')
 }], (err) => {
 
   if (err) {
       throw err;
   }
 
-  // set route
+  // serve static assests
   server.route({
     method: 'GET',
     path: '/{param*}',
@@ -49,6 +51,24 @@ server.register([{
       }
     }
   });
+
+  // use handlebars as template engine
+  server.views(){
+    engines: {
+      hbs: require('handlebars')
+    },
+    relativeTo: __dirname,
+    path: './templates',
+    helpersPath: './templates/helpers',
+    layoutPath: '.templates/layouts',
+    layout: true,
+    isCached: false, // should be true in production
+    context: (request) => {
+      return {
+        user: request.auth.credentials
+      }
+    }
+  }
 
   // Starting the server
   server.start((err) => {
