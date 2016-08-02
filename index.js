@@ -12,18 +12,9 @@ server.connection({
     port: 4000
 });
 
-//Creating routes
-server.route({
-  method: 'GET',
-  path: '/',
-  handler: function (request, reply) {
-
-      return reply('Hello from hapi!');
-  }
-});
 
 //Register good plugin and start the server
-server.register({
+server.register([{
   register: require('good'),
   options: {
     reporters: {
@@ -39,11 +30,25 @@ server.register({
       }, 'stdout']
     }
   }
-}, (err) => {
+}, {
+  register: require('inert')
+}], (err) => {
 
   if (err) {
       throw err;
   }
+
+  // set route
+  server.route({
+    method: 'GET',
+    path: '/{param*}',
+    handler: {
+      directory: {
+        path: './public',
+        redirectToSlash: true
+      }
+    }
+  });
 
   // Starting the server
   server.start((err) => {
