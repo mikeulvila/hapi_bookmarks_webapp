@@ -34,6 +34,8 @@ server.register([{
   register: require('inert')
 }, {
   register: require('vision')
+}, {
+  register: require('./routes/bookmarks')
 }], (err) => {
 
   if (err) {
@@ -53,14 +55,14 @@ server.register([{
   });
 
   // use handlebars as template engine
-  server.views(){
+  server.views({
     engines: {
       hbs: require('handlebars')
     },
     relativeTo: __dirname,
     path: './templates',
     helpersPath: './templates/helpers',
-    layoutPath: '.templates/layouts',
+    layoutPath: './templates/layouts',
     layout: true,
     isCached: false, // should be true in production
     context: (request) => {
@@ -68,7 +70,17 @@ server.register([{
         user: request.auth.credentials
       }
     }
-  }
+  });
+
+  // redirect / to /bookmarks
+  server.route({
+    method: 'GET',
+    path: '/',
+    handler: function (request, reply) {
+
+       return reply.redirect('/bookmarks');
+    }
+  });
 
   // Starting the server
   server.start((err) => {
