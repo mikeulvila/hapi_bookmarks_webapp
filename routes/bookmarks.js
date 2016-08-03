@@ -38,6 +38,9 @@ exports.register = function (server, options, next) {
       return reply.view('form', {
         edit: false
       });
+    },
+    config: {
+      auth: 'session'
     }
   });
 
@@ -48,6 +51,9 @@ exports.register = function (server, options, next) {
     handler: function (request, reply) {
 
       return reply.redirect('/bookmarks');
+    },
+    config: {
+      auth: 'session'
     }
   });
 
@@ -61,6 +67,9 @@ exports.register = function (server, options, next) {
         values: bookmarks[0],
         edit: true
       });
+    },
+    config: {
+      auth: 'session'
     }
   });
 
@@ -81,6 +90,9 @@ exports.register = function (server, options, next) {
     handler: function (request, reply) {
 
       return reply.redirect('/bookmarks');
+    },
+    config: {
+      auth: 'session'
     }
   });
 
@@ -91,6 +103,9 @@ exports.register = function (server, options, next) {
     handler: function (request, reply) {
 
       return reply.redirect('/bookmarks');
+    },
+    config: {
+      auth: 'session'
     }
   });
 
