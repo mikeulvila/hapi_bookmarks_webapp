@@ -1,21 +1,8 @@
 'use strict';
 
-exports.register = function (server, options, next) {
+const Wreck = require('wreck');
 
-    // fake data
-    const bookmarks = [{
-      "title": "CNN",
-      "url": "http://cnn.com",
-      "created": "2016-06-16T21:28:57.151Z",
-      "upvotes": 1,
-      "id": "5547fcf0-3409-11e6-9c89-a7791433fedf"
-    }, {
-      "title": "NYT",
-      "url": "http://nytimes.com/",
-      "created": "2016-06-20T23:34:25.759Z",
-      "upvotes": 0,
-      "id": "865566f0-373f-11e6-9319-fba74a258305"
-    }];
+exports.register = function (server, options, next) {
 
 // get all bookmarks
   server.route({
@@ -23,8 +10,20 @@ exports.register = function (server, options, next) {
     path: '/bookmarks',
     handler: function (request, reply) {
 
-      return reply.view('index', {
-        bookmarks: bookmarks
+      const apiUrl = server.settings.app.apiBaseUrl + '/bookmarks?sort=' + request.query.sort;
+
+      Wreck.get(apiUrl, {
+        json: true
+      }, (err, res, payload) => {
+
+        if (err) {
+          throw err;
+        }
+
+        return reply.view('index', {
+          bookmarks: payload
+        });
+
       });
     }
   });
@@ -50,7 +49,24 @@ exports.register = function (server, options, next) {
     path: '/bookmarks',
     handler: function (request, reply) {
 
-      return reply.redirect('/bookmarks');
+      const apiUrl = server.settings.app.apiBaseUrl + '/bookmarks';
+      const token = request.auth.credentials.token;
+
+      Wreck.post(apiUrl, {
+        payload: JSON.stringify(request.payload),
+        json: true,
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      }, (err, res, payload) => {
+
+        if (err) {
+          throw err;
+        }
+
+        return reply.redirect('/bookmarks');
+      });
+
     },
     config: {
       auth: 'session'
@@ -63,9 +79,20 @@ exports.register = function (server, options, next) {
     path: '/bookmarks/{id}/edit',
     handler: function (request, reply) {
 
-      return reply.view('form', {
-        values: bookmarks[0],
-        edit: true
+      const apiUrl = server.settings.app.apiBaseUrl + '/bookmarks/' + request.params.id;
+
+      Wreck.get(apiUrl, {
+        json: true,
+      }, (err, res, payload) => {
+
+        if (err) {
+          throw err;
+        }
+
+        return reply.view('form', {
+          values: payload,
+          edit: true
+        });
       });
     },
     config: {
@@ -79,7 +106,23 @@ exports.register = function (server, options, next) {
     path: '/bookmarks/{id}',
     handler: function (request, reply) {
 
-      return reply.redirect('/bookmarks');
+      const apiUrl = server.settings.app.apiBaseUrl + '/bookmarks/' + request.params.id;
+      const token = request.auth.credentials.token;
+
+      Wreck.patch(apiUrl, {
+        payload: JSON.stringify(request.payload),
+        json: true,
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      }, (err, res, payload) => {
+
+        if (err) {
+          throw err;
+        }
+
+        return reply.redirect('/bookmarks');
+      });
     }
   });
 
@@ -89,7 +132,23 @@ exports.register = function (server, options, next) {
     path: '/bookmarks/{id}/delete',
     handler: function (request, reply) {
 
-      return reply.redirect('/bookmarks');
+      const apiUrl = server.settings.app.apiBaseUrl + '/bookmarks/' + request.params.id;
+      const token = request.auth.credentials.token;
+
+      Wreck.delete(apiUrl, {
+        payload: JSON.stringify(request.payload),
+        json: true,
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      }, (err, res, payload) => {
+
+        if (err) {
+          throw err;
+        }
+
+        return reply.redirect('/bookmarks');
+      });
     },
     config: {
       auth: 'session'
@@ -102,7 +161,23 @@ exports.register = function (server, options, next) {
     path: '/bookmarks/{id}/upvote',
     handler: function (request, reply) {
 
-      return reply.redirect('/bookmarks');
+      const apiUrl = server.settings.app.apiBaseUrl + '/bookmarks/' + request.params.id + '/upvote';
+      const token = request.auth.credentials.token;
+
+      Wreck.post(apiUrl, {
+        payload: JSON.stringify(request.payload),
+        json: true,
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      }, (err, res, payload) => {
+
+        if (err) {
+          throw err;
+        }
+
+        return reply.redirect('/bookmarks');
+      });
     },
     config: {
       auth: 'session'
