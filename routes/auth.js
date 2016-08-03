@@ -1,12 +1,8 @@
 'use strict';
 
-exports.register = function(server, options, next) {
+const Wreck = require('wreck');
 
-  // mock payload
-  const loginPayload = {
-    "token": "450ca305d7042c0a0f19",
-    "username": "john"
-  };
+exports.register = function(server, options, next) {
 
   server.route({
     method: 'GET',
@@ -22,9 +18,26 @@ exports.register = function(server, options, next) {
     path: '/login',
     handler: function (request, reply) {
 
-      request.cookieAuth.set(loginPayload);
+      const apiUrl = server.settings.app.apiBaseUrl + '/login';
 
-      return reply.redirect('/bookmarks');
+      Wreck.post(apiUrl, {
+        payload: JSON.stringify(request.payload),
+        json: true
+      }, (err, res, payload) => {
+
+        if (err) {
+          throw err;
+        }
+
+        if(res.statusCode !== 200) {
+          return reply.redirect('/login');
+        }
+
+        request.cookieAuth.set(payload);
+
+        return reply.redirect('/bookmarks');
+      });
+
     }
   });
 
