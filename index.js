@@ -35,6 +35,10 @@ server.register([{
 }, {
   register: require('vision')
 }, {
+  register: require('hapi-auth-cookie')
+}, {
+  register: require('./plugins/auth')
+}, {
   register: require('./routes/bookmarks')
 }], (err) => {
 
