@@ -1,8 +1,24 @@
 'use strict';
 
 const Wreck = require('wreck');
+const Joi = require('joi');
 
 exports.register = function (server, options, next) {
+
+  // error detail function
+  const _extractErrorDetails = function(error) {
+
+    const errors = {};
+    const errorDetails = error.data.details;
+
+    errorDetails.forEach(errorDetail => {
+      if (!errors.hasOwnProperty(errorDetail.path)) {
+        errors[errorDetail.path] = errorDetail.message;
+      }
+    });
+
+    return errors;
+  };
 
 // get all bookmarks
   server.route({
@@ -25,6 +41,13 @@ exports.register = function (server, options, next) {
         });
 
       });
+    },
+    config: {
+      validate: {
+        query: {
+          sort: Joi.string().valid('top', 'new').default('top')
+        }
+      }
     }
   });
 
@@ -69,7 +92,26 @@ exports.register = function (server, options, next) {
 
     },
     config: {
-      auth: 'session'
+      auth: 'session',
+      validate: {
+        payload: {
+          title: Joi.string().min(1).max(100).required(),
+          url: Joi.string().uri().required()
+        },
+        options: {
+          abortEarly: false
+        },
+        failAction: function(request, reply, source, error) {
+
+          const errors = _extractErrorDetails(error);
+
+          return reply.view('form', {
+            errors: errors,
+            values: request.payload,
+            edit: false
+          }).code(400);
+        }
+      }
     }
   });
 
@@ -123,6 +165,30 @@ exports.register = function (server, options, next) {
 
         return reply.redirect('/bookmarks');
       });
+    },
+    config: {
+      auth: 'session',
+      validate: {
+        payload: {
+          title: Joi.string().min(1).max(100).required(),
+          url: Joi.string().uri().required()
+        },
+        options: {
+          abortEarly: false
+        },
+        failAction: function(request, reply, source, error) {
+
+          const errors = _extractErrorDetails(error);
+          const values = request.payload;
+          values.id = request.params.id;
+
+          return reply.view('form', {
+            errors: errors,
+            values: values,
+            edit: true
+          }).code(400);
+        }
+      }
     }
   });
 
