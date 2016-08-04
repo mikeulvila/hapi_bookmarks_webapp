@@ -46,6 +46,8 @@ server.register([{
   register: require('./routes/auth')
 }, {
   register: require('blipp')
+}, {
+  register: require('lout') // for docs go to /docs in browser
 }], (err) => {
 
   if (err) {
