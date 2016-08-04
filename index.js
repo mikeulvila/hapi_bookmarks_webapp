@@ -37,6 +37,8 @@ server.register([{
 }, {
   register: require('hapi-auth-cookie')
 }, {
+  register: require('./plugins/error')
+}, {
   register: require('./plugins/auth')
 }, {
   register: require('./routes/bookmarks')
